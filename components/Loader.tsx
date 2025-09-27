@@ -1,0 +1,55 @@
+import React from 'react';
+
+interface LoaderProps {
+    isEditing?: boolean;
+}
+
+const Loader: React.FC<LoaderProps> = ({ isEditing = false }) => {
+    const imageMessages = [
+        "Warming up the AI's creativity...",
+        "Mixing digital paints and pixels...",
+        "Consulting with the design muses...",
+        "Generating a masterpiece...",
+        "Finalizing the details...",
+    ];
+
+    const editingMessages = [
+        "Analyzing your selection...",
+        "Applying AI magic to the masked area...",
+        "Retouching the pixels...",
+        "Seamlessly blending the changes...",
+        "Finalizing your edit...",
+    ];
+
+    const messages = isEditing 
+        ? editingMessages 
+        : imageMessages;
+
+    const [message, setMessage] = React.useState(messages[0]);
+
+    React.useEffect(() => {
+        setMessage(messages[0]); // Reset to first message on type change
+        const intervalId = setInterval(() => {
+            setMessage(prev => {
+                const currentIndex = messages.indexOf(prev);
+                const nextIndex = (currentIndex + 1) % messages.length;
+                return messages[nextIndex];
+            });
+        }, 3000);
+
+        return () => clearInterval(intervalId);
+    }, [messages]);
+
+
+  return (
+    <div className="text-center animate-fade-in">
+        <div className="relative w-24 h-24 mx-auto">
+            <div className="absolute inset-0 border-4 border-base-300 rounded-full"></div>
+            <div className="absolute inset-0 border-4 border-t-brand-primary border-l-brand-primary rounded-full animate-spin"></div>
+        </div>
+        <p className="mt-6 text-lg font-semibold text-gray-300 transition-opacity duration-500">{message}</p>
+    </div>
+  );
+};
+
+export default Loader;
