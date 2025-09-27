@@ -3,11 +3,11 @@ import { useLanguage } from '../context/LanguageContext';
 import { useTranslation } from '../hooks/useTranslation';
 
 interface HeaderProps {
-    onReset: () => void;
-    showReset: boolean;
+    onSignOut: () => void;
+    showSignOut: boolean;
 }
 
-const Header: React.FC<HeaderProps> = ({ onReset, showReset }) => {
+const Header: React.FC<HeaderProps> = ({ onSignOut, showSignOut }) => {
   const { setLanguage } = useLanguage();
   const { t } = useTranslation();
 
@@ -33,15 +33,15 @@ const Header: React.FC<HeaderProps> = ({ onReset, showReset }) => {
                     <option value="mr">MR</option>
                 </select>
             </div>
-            {showReset && (
+            {showSignOut && (
                 <button 
-                    onClick={onReset}
+                    onClick={onSignOut}
                     className="flex items-center space-x-2 bg-base-300 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-300 transform hover:scale-105"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 -960 960 960" fill="currentColor">
                         <path d="M160-160v-80h110l-16-14q-52-46-73-105t-21-119q0-111 66.5-197.5T400-790v84q-72 26-116 88.5T240-478q0 45 17 87.5t53 78.5l10 10v-98h80v240H160Zm400-10v-84q72-26 116-88.5T720-482q0-45-17-87.5T650-648l-10-10v98h-80v-240h240v80H690l16 14q49 49 71.5 106.5T800-482q0 111-66.5 197.5T560-170Z"/>
                     </svg>
-                    <span>{t('header.start_over')}</span>
+                    <span>{t('header.sign_out')}</span>
                 </button>
             )}
         </div>

@@ -1,3 +1,4 @@
+import { useCallback } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 
 // By moving the JSON content directly into the TS file, we avoid the unsupported
@@ -6,7 +7,22 @@ import { useLanguage } from '../context/LanguageContext';
 
 const en = {
   "header.title": "Social Poster",
-  "header.start_over": "Start Over",
+  "header.sign_out": "Sign Out",
+  "auth.title": "Sign in to Continue",
+  "auth.signInWithGoogle": "Sign in with Google",
+  "auth.signInWithMobile": "Sign in with Mobile Number",
+  "auth.or": "OR",
+  "auth.mobileNumberLabel": "Enter your mobile number",
+  "auth.mobileNumberPlaceholder": "10-digit mobile number",
+  "auth.sendOtp": "Send OTP",
+  "auth.otpLabel": "Enter OTP",
+  "auth.otpPlaceholder": "6-digit OTP",
+  "auth.verifyOtp": "Verify OTP",
+  "auth.invalidMobile": "Please enter a valid 10-digit mobile number.",
+  "auth.invalidOtp": "Invalid OTP. Please try again.",
+  "auth.resendOtp": "Resend OTP",
+  "auth.resendOtpIn": "Resend OTP in",
+  "auth.goBack": "Go Back",
   "uploader.drop_here": "Drop your image here, or click to browse",
   "uploader.file_types": "PNG, JPG, GIF up to 10MB",
   "canvas.title": "Set Canvas Size",
@@ -19,7 +35,9 @@ const en = {
   "canvas.preset.story": "Story",
   "canvas.custom_size": "Custom Size",
   "canvas.bg_color": "Background Color",
-  "canvas.remove_bg": "Remove Background (Transparent)",
+  "canvas.merge_background_title": "Merge Background",
+  "canvas.upload_merge_background": "Upload to Merge",
+  "canvas.clear_backgrounds": "Clear",
   "canvas.cancel": "Cancel",
   "canvas.confirm": "Confirm Size",
   "canvas.processing": "Processing...",
@@ -30,8 +48,14 @@ const en = {
   "editor.choose_template": "Choose a Template",
   "editor.events": "Events",
   "editor.festivals": "Festivals",
-  "editor.headline_input": "Add Custom Text (Optional)",
-  "editor.headline_placeholder": "e.g., Happy Birthday!",
+  "editor.choose_language_title": "Choose Language for Poster Text",
+  "editor.language.english": "English",
+  "editor.language.marathi": "Marathi",
+  "editor.language.hindi": "Hindi",
+  "editor.custom_text_title": "Add Custom Text & Style (Optional)",
+  "editor.custom_text_placeholder": "Enter your text here...",
+  "editor.text_color": "Text Color",
+  "editor.font_size": "Font Size",
   "editor.style": "Add Style (Optional)",
   "editor.upload_logo_poster": "Upload Logo (Optional)",
   "editor.upload_logo_button": "Upload Logo",
@@ -49,9 +73,6 @@ const en = {
   "display.download_poster": "Download Poster",
   "display.download_video": "Download Video",
   "error.title": "Error",
-  // FIX: Added missing footer translation keys to fix TypeScript errors in Footer.tsx
-  "footer.phone": "Phone",
-  "footer.address": "Address",
   "loader.image.1": "Warming up the AI's creativity...",
   "loader.image.2": "Mixing digital paints and pixels...",
   "loader.image.3": "Consulting with the design muses...",
@@ -78,12 +99,30 @@ const en = {
   "templates.festival.eid": "Eid",
   "templates.festival.ganesh_chaturthi": "Ganesh Chaturthi",
   "templates.festival.dussehra": "Dussehra",
-  "templates.festival.janmashtami": "Janmashtami"
+  "templates.festival.janmashtami": "Janmashtami",
+  "templates.festival.shivjayanti": "Shiv Jayanti",
+  "templates.festival.gudi_padwa": "Gudi Padwa",
+  "templates.festival.new_year": "New Year"
 };
 
 const hi = {
   "header.title": "सोशल पोस्टर",
-  "header.start_over": "फिर से शुरू करें",
+  "header.sign_out": "साइन आउट करें",
+  "auth.title": "जारी रखने के लिए साइन इन करें",
+  "auth.signInWithGoogle": "Google के साथ साइन इन करें",
+  "auth.signInWithMobile": "मोबाइल नंबर से साइन इन करें",
+  "auth.or": "या",
+  "auth.mobileNumberLabel": "अपना मोबाइल नंबर दर्ज करें",
+  "auth.mobileNumberPlaceholder": "10-अंकीय मोबाइल नंबर",
+  "auth.sendOtp": "ओटीपी भेजें",
+  "auth.otpLabel": "ओटीपी दर्ज करें",
+  "auth.otpPlaceholder": "6-अंकीय ओटीपी",
+  "auth.verifyOtp": "ओटीपी सत्यापित करें",
+  "auth.invalidMobile": "कृपया एक वैध 10-अंकीय मोबाइल नंबर दर्ज करें।",
+  "auth.invalidOtp": "अमान्य ओटीपी। कृपया पुन: प्रयास करें।",
+  "auth.resendOtp": "ओटीपी फिर से भेजें",
+  "auth.resendOtpIn": "ओटीपी फिर से भेजें",
+  "auth.goBack": "वापस जाएं",
   "uploader.drop_here": "अपनी छवि यहां खींचें, या ब्राउज़ करने के लिए क्लिक करें",
   "uploader.file_types": "PNG, JPG, GIF 10MB तक",
   "canvas.title": "कैनवास का आकार सेट करें",
@@ -96,7 +135,9 @@ const hi = {
   "canvas.preset.story": "स्टोरी",
   "canvas.custom_size": "कस्टम आकार",
   "canvas.bg_color": "पृष्ठभूमि का रंग",
-  "canvas.remove_bg": "पृष्ठभूमि हटाएं (पारदर्शी)",
+  "canvas.merge_background_title": "पृष्ठभूमि मर्ज करें",
+  "canvas.upload_merge_background": "मर्ज करने के लिए अपलोड करें",
+  "canvas.clear_backgrounds": "साफ़ करें",
   "canvas.cancel": "रद्द करें",
   "canvas.confirm": "आकार की पुष्टि करें",
   "canvas.processing": "प्रोसेस हो रहा है...",
@@ -107,8 +148,14 @@ const hi = {
   "editor.choose_template": "एक टेम्पलेट चुनें",
   "editor.events": "इवेंट्स",
   "editor.festivals": "त्योहार",
-  "editor.headline_input": "कस्टम टेक्स्ट जोड़ें (वैकल्पिक)",
-  "editor.headline_placeholder": "उदा., जन्मदिन मुबारक हो!",
+  "editor.choose_language_title": "पोस्टर टेक्स्ट के लिए भाषा चुनें",
+  "editor.language.english": "अंग्रेज़ी",
+  "editor.language.marathi": "मराठी",
+  "editor.language.hindi": "हिन्दी",
+  "editor.custom_text_title": "कस्टम टेक्स्ट और स्टाइल जोड़ें (वैकल्पिक)",
+  "editor.custom_text_placeholder": "अपना टेक्स्ट यहां दर्ज करें...",
+  "editor.text_color": "टेक्स्ट का रंग",
+  "editor.font_size": "फ़ॉन्ट आकार",
   "editor.style": "शैली जोड़ें (वैकल्पिक)",
   "editor.upload_logo_poster": "लोगो अपलोड करें (वैकल्पिक)",
   "editor.upload_logo_button": "लोगो अपलोड करें",
@@ -120,24 +167,21 @@ const hi = {
   "editor.custom_text_mandatory": "कस्टम टेक्स्ट जोड़ें",
   "editor.generate_poster": "पोस्टर बनाएं",
   "editor.generate_video": "वीडियो बनाएं",
-  "editor.generating": "बनाया जा रहा है...",
-  "display.creation_awaits": "आपकी रचना प्रतीक्षा कर रही है",
+  "editor.generating": "जनरेट हो रहा है...",
+  "display.creation_awaits": "आपकी रचना प्रतीक्षारत है",
   "display.creation_awaits_desc": "अपनी छवि संपादित करने के लिए टूल का उपयोग करें, या पोस्टर बनाने के लिए एक प्रॉम्प्ट दर्ज करें। आपके परिणाम यहां दिखाई देंगे।",
   "display.download_poster": "पोस्टर डाउनलोड करें",
   "display.download_video": "वीडियो डाउनलोड करें",
   "error.title": "त्रुटि",
-  // FIX: Added missing footer translation keys to fix TypeScript errors in Footer.tsx
-  "footer.phone": "फ़ोन",
-  "footer.address": "पता",
-  "loader.image.1": "एआई की रचनात्मकता को गर्म किया जा रहा है...",
+  "loader.image.1": "AI की रचनात्मकता को गर्म किया जा रहा है...",
   "loader.image.2": "डिजिटल पेंट और पिक्सल मिलाए जा रहे हैं...",
-  "loader.image.3": "डिजाइन म्यूज से परामर्श किया जा रहा है...",
+  "loader.image.3": "डिजाइन देवियों से परामर्श किया जा रहा है...",
   "loader.image.4": "एक उत्कृष्ट कृति बनाई जा रही है...",
-  "loader.image.5": "विवरण को अंतिम रूप दिया जा रहा है...",
-  "loader.video.1": "डिजिटल फिल्म क्रू की स्थापना...",
+  "loader.image.5": "विवरणों को अंतिम रूप दिया जा रहा है...",
+  "loader.video.1": "डिजिटल फिल्म क्रू तैयार किया जा रहा है...",
   "loader.video.2": "आपके दृश्य को फ्रेम दर फ्रेम एनिमेट किया जा रहा है...",
   "loader.video.3": "इसमें एक मिनट लग सकता है, महान कला को धैर्य की आवश्यकता होती है!",
-  "loader.video.4": "वीडियो अनुक्रम को प्रस्तुत किया जा रहा है...",
+  "loader.video.4": "वीडियो अनुक्रम प्रस्तुत किया जा रहा है...",
   "loader.video.5": "आपके एनीमेशन में अंतिम स्पर्श जोड़ा जा रहा है...",
   "loader.video.subtitle": "वीडियो निर्माण एक जटिल प्रक्रिया है और इसमें कुछ मिनट लग सकते हैं।",
   "templates.event.wedding": "शादी",
@@ -145,7 +189,7 @@ const hi = {
   "templates.event.birthday": "जन्मदिन",
   "templates.event.baby_shower": "गोद भराई",
   "templates.event.housewarming": "गृह प्रवेश",
-  "templates.event.naming_ceremony": "नामकरण समारोह",
+  "templates.event.naming_ceremony": "नामकरण संस्कार",
   "templates.event.birth_announcement": "जन्म की घोषणा",
   "templates.event.death_announcement": "मृत्यु की घोषणा",
   "templates.festival.diwali": "दिवाली",
@@ -155,12 +199,30 @@ const hi = {
   "templates.festival.eid": "ईद",
   "templates.festival.ganesh_chaturthi": "गणेश चतुर्थी",
   "templates.festival.dussehra": "दशहरा",
-  "templates.festival.janmashtami": "जन्माष्टमी"
+  "templates.festival.janmashtami": "जन्माष्टमी",
+  "templates.festival.shivjayanti": "शिव जयंती",
+  "templates.festival.gudi_padwa": "गुड़ी पड़वा",
+  "templates.festival.new_year": "नया साल"
 };
 
 const mr = {
   "header.title": "सोशल पोस्टर",
-  "header.start_over": "पुन्हा सुरू करा",
+  "header.sign_out": "साइन आउट करा",
+  "auth.title": "सुरू ठेवण्यासाठी साइन इन करा",
+  "auth.signInWithGoogle": "Google ने साइन इन करा",
+  "auth.signInWithMobile": "मोबाइल नंबरने साइन इन करा",
+  "auth.or": "किंवा",
+  "auth.mobileNumberLabel": "तुमचा मोबाईल नंबर टाका",
+  "auth.mobileNumberPlaceholder": "१०-अंकी मोबाईल नंबर",
+  "auth.sendOtp": "ओटीपी पाठवा",
+  "auth.otpLabel": "ओटीपी टाका",
+  "auth.otpPlaceholder": "६-अंकी ओटीपी",
+  "auth.verifyOtp": "ओटीपी सत्यापित करा",
+  "auth.invalidMobile": "कृपया वैध १०-अंकी मोबाईल नंबर टाका.",
+  "auth.invalidOtp": "अवैध ओटीपी. कृपया पुन्हा प्रयत्न करा.",
+  "auth.resendOtp": "ओटीपी पुन्हा पाठवा",
+  "auth.resendOtpIn": "मध्ये ओटीपी पुन्हा पाठवा",
+  "auth.goBack": "मागे जा",
   "uploader.drop_here": "तुमची प्रतिमा येथे टाका, किंवा ब्राउझ करण्यासाठी क्लिक करा",
   "uploader.file_types": "PNG, JPG, GIF 10MB पर्यंत",
   "canvas.title": "कॅनव्हास आकार सेट करा",
@@ -171,9 +233,11 @@ const mr = {
   "canvas.preset.portrait": "पोर्ट्रेट",
   "canvas.preset.landscape": "लँडस्केप",
   "canvas.preset.story": "स्टोरी",
-  "canvas.custom_size": "कस्टम आकार",
+  "canvas.custom_size": "सानुकूल आकार",
   "canvas.bg_color": "पार्श्वभूमी रंग",
-  "canvas.remove_bg": "पार्श्वभूमी काढा (पारदर्शक)",
+  "canvas.merge_background_title": "पार्श्वभूमी विलीन करा",
+  "canvas.upload_merge_background": "विलीन करण्यासाठी अपलोड करा",
+  "canvas.clear_backgrounds": "साफ करा",
   "canvas.cancel": "रद्द करा",
   "canvas.confirm": "आकाराची पुष्टी करा",
   "canvas.processing": "प्रक्रिया होत आहे...",
@@ -184,8 +248,14 @@ const mr = {
   "editor.choose_template": "एक टेम्पलेट निवडा",
   "editor.events": "कार्यक्रम",
   "editor.festivals": "सण",
-  "editor.headline_input": "सानुकूल मजकूर जोडा (पर्यायी)",
-  "editor.headline_placeholder": "उदा., वाढदिवसाच्या हार्दिक शुभेच्छा!",
+  "editor.choose_language_title": "पोस्टर मजकुरासाठी भाषा निवडा",
+  "editor.language.english": "इंग्रजी",
+  "editor.language.marathi": "मराठी",
+  "editor.language.hindi": "हिंदी",
+  "editor.custom_text_title": "सानुकूल मजकूर आणि शैली जोडा (पर्यायी)",
+  "editor.custom_text_placeholder": "तुमचा मजकूर येथे प्रविष्ट करा...",
+  "editor.text_color": "मजकूराचा रंग",
+  "editor.font_size": "फॉन्ट आकार",
   "editor.style": "शैली जोडा (पर्यायी)",
   "editor.upload_logo_poster": "लोगो अपलोड करा (पर्यायी)",
   "editor.upload_logo_button": "लोगो अपलोड करा",
@@ -193,29 +263,26 @@ const mr = {
   "editor.add_footer": "तळटीप तपशील जोडा (पर्यायी)",
   "editor.phone_number": "फोन नंबर",
   "editor.address": "पत्ता",
-  "editor.custom_text": "कस्टम मजकूर जोडा (पर्यायी)",
-  "editor.custom_text_mandatory": "कस्टम मजकूर जोडा",
+  "editor.custom_text": "सानुकूल मजकूर जोडा (पर्यायी)",
+  "editor.custom_text_mandatory": "सानुकूल मजकूर जोडा",
   "editor.generate_poster": "पोस्टर तयार करा",
   "editor.generate_video": "व्हिडिओ तयार करा",
   "editor.generating": "तयार होत आहे...",
   "display.creation_awaits": "तुमची निर्मिती प्रतीक्षेत आहे",
-  "display.creation_awaits_desc": "तुमची प्रतिमा संपादित करण्यासाठी साधने वापरा, किंवा पोस्टर तयार करण्यासाठी प्रॉम्प्ट प्रविष्ट करा. तुमचे परिणाम येथे दिसतील.",
+  "display.creation_awaits_desc": "तुमची प्रतिमा संपादित करण्यासाठी साधनांचा वापर करा, किंवा पोस्टर तयार करण्यासाठी प्रॉम्प्ट प्रविष्ट करा. तुमचे परिणाम येथे दिसतील.",
   "display.download_poster": "पोस्टर डाउनलोड करा",
   "display.download_video": "व्हिडिओ डाउनलोड करा",
   "error.title": "त्रुटि",
-  // FIX: Added missing footer translation keys to fix TypeScript errors in Footer.tsx
-  "footer.phone": "फोन",
-  "footer.address": "पत्ता",
-  "loader.image.1": "एआयच्या सर्जनशीलतेला उब देत आहे...",
+  "loader.image.1": "AI च्या सर्जनशीलतेला उत्तेजन देत आहे...",
   "loader.image.2": "डिजिटल रंग आणि पिक्सेल मिसळत आहे...",
-  "loader.image.3": "डिझाइन म्यूजशी सल्लामसलत करत आहे...",
+  "loader.image.3": "डिझाइन प्रेरणास्थानांशी सल्लामसलत करत आहे...",
   "loader.image.4": "एक उत्कृष्ट कृती तयार करत आहे...",
-  "loader.image.5": "तपशिलांना अंतिम रूप देत आहे...",
+  "loader.image.5": "तपशीलांना अंतिम रूप देत आहे...",
   "loader.video.1": "डिजिटल फिल्म क्रू सेट करत आहे...",
-  "loader.video.2": "तुमचे दृश्य फ्रेम बाय फ्रेम एनिमेट करत आहे...",
+  "loader.video.2": "तुमचे दृश्य फ्रेम बाय फ्रेम सजीव करत आहे...",
   "loader.video.3": "याला एक मिनिट लागू शकतो, महान कलेसाठी संयम आवश्यक आहे!",
-  "loader.video.4": "व्हिडिओ क्रम प्रस्तुत करत आहे...",
-  "loader.video.5": "तुमच्या एनिमेशनमध्ये अंतिम स्पर्श जोडत आहे...",
+  "loader.video.4": "व्हिडिओ क्रम रेंडर करत आहे...",
+  "loader.video.5": "तुमच्या ॲनिमेशनला अंतिम स्पर्श देत आहे...",
   "loader.video.subtitle": "व्हिडिओ निर्मिती ही एक गुंतागुंतीची प्रक्रिया आहे आणि याला काही मिनिटे लागू शकतात.",
   "templates.event.wedding": "लग्न",
   "templates.event.engagement": "साखरपुडा",
@@ -228,27 +295,34 @@ const mr = {
   "templates.festival.diwali": "दिवाळी",
   "templates.festival.holi": "होळी",
   "templates.festival.navratri": "नवरात्री",
-  "templates.festival.raksha_bandhan": "रक्षा बंधन",
+  "templates.festival.raksha_bandhan": "रक्षाबंधन",
   "templates.festival.eid": "ईद",
   "templates.festival.ganesh_chaturthi": "गणेश चतुर्थी",
   "templates.festival.dussehra": "दसरा",
-  "templates.festival.janmashtami": "जन्माष्टमी"
+  "templates.festival.janmashtami": "जन्माष्टमी",
+  "templates.festival.shivjayanti": "शिवजयंती",
+  "templates.festival.gudi_padwa": "गुढी पाडवा",
+  "templates.festival.new_year": "नवीन वर्ष"
 };
 
 
-const translations = { en, hi, mr };
+const translations = {
+  en,
+  hi,
+  mr
+};
 
-type TranslationKey = keyof typeof en;
+type TranslationKeys = keyof typeof en;
 
 export const useTranslation = () => {
   const { language } = useLanguage();
 
-  const t = (key: TranslationKey): string => {
-    // This might cause a type error if hi and mr don't have the same keys as en.
-    // Casting to any is a pragmatic way to handle this in a multilingual setup
-    // where we assume dictionaries are structurally identical.
-    return (translations[language] as any)[key] || String(key);
-  };
+  const t = useCallback(
+    (key: TranslationKeys) => {
+      return translations[language][key] || translations['en'][key] || key;
+    },
+    [language]
+  );
 
-  return { t, language };
+  return { t };
 };
