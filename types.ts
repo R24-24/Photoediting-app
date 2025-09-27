@@ -13,3 +13,8 @@ export interface GeneratedContent {
 }
 
 export type ToolType = 'select' | 'magic-edit' | 'crop' | 'adjust' | 'text' | 'filter';
+
+export interface PosterLogo {
+    base64: string;
+    mimeType: string;
+}

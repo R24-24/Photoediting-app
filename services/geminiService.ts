@@ -1,5 +1,5 @@
 import { GoogleGenAI, Modality } from "@google/genai";
-import { GeneratedContent } from '../types';
+import { GeneratedContent, PosterLogo } from '../types';
 
 if (!process.env.API_KEY) {
     throw new Error("API_KEY environment variable not set");
@@ -23,7 +23,8 @@ export async function editImageWithPrompt(
   base64ImageData: string,
   mimeType: string,
   prompt: string,
-  maskBase64: string | null
+  maskBase64: string | null,
+  logo: PosterLogo | null
 ): Promise<GeneratedContent> {
   try {
     const imagePart = {
@@ -35,8 +36,8 @@ export async function editImageWithPrompt(
 
     const textPart = { text: prompt };
 
-    const parts: any[] = [imagePart, textPart];
-
+    const parts: any[] = [imagePart];
+    
     if (maskBase64) {
       const maskPart = {
         inlineData: {
@@ -44,8 +45,20 @@ export async function editImageWithPrompt(
           mimeType: 'image/png',
         }
       };
-      parts.splice(1, 0, maskPart); // Insert mask between image and prompt
+      parts.push(maskPart);
     }
+
+    if (logo) {
+      const logoPart = {
+        inlineData: {
+          data: logo.base64,
+          mimeType: logo.mimeType,
+        }
+      };
+      parts.push(logoPart);
+    }
+
+    parts.push(textPart);
 
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash-image-preview',

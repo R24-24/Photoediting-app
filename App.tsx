@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { GeneratedContent, ImageData } from './types';
+import { GeneratedContent, ImageData, PosterLogo } from './types';
 import { editImageWithPrompt, generateVideoFromImage } from './services/geminiService';
 import ImageUploader from './components/ImageUploader';
 import Editor from './components/Editor';
@@ -7,6 +7,8 @@ import PosterDisplay from './components/PosterDisplay';
 import Header from './components/Header';
 import Loader from './components/Loader';
 import CanvasSizer from './components/CanvasSizer';
+import { useLanguage } from './context/LanguageContext';
+import { useTranslation } from './hooks/useTranslation';
 
 const App: React.FC = () => {
   const [originalImage, setOriginalImage] = useState<ImageData | null>(null);
@@ -16,6 +18,8 @@ const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [loadingType, setLoadingType] = useState<'image' | 'video'>('image');
   const [error, setError] = useState<string | null>(null);
+  const { language } = useLanguage();
+  const { t } = useTranslation();
 
   const handleImageUpload = (imageData: ImageData) => {
     setImageToSize(imageData);
@@ -44,7 +48,7 @@ const App: React.FC = () => {
     setIsSizingCanvas(false);
   }, []);
 
-  const handleGenerate = useCallback(async (prompt: string, outputType: 'Image' | 'Video') => {
+  const handleGenerate = useCallback(async (prompt: string, outputType: 'Image' | 'Video', logoForPoster: PosterLogo | null) => {
     if (!originalImage) {
       setError("Please upload an image first.");
       return;
@@ -60,7 +64,7 @@ const App: React.FC = () => {
         const result = await generateVideoFromImage(originalImage.base64, originalImage.mimeType, prompt, originalImage.width, originalImage.height);
         setGeneratedContent(result);
       } else { // 'Image'
-        const result = await editImageWithPrompt(originalImage.base64, originalImage.mimeType, prompt, null);
+        const result = await editImageWithPrompt(originalImage.base64, originalImage.mimeType, prompt, null, logoForPoster);
         setGeneratedContent(result);
       }
     } catch (e) {
@@ -73,10 +77,11 @@ const App: React.FC = () => {
   }, [originalImage]);
 
   const showResetButton = !!originalImage || isSizingCanvas;
+  const fontClass = language === 'en' ? 'font-sans' : 'font-devanagari';
 
   return (
-    <div className="min-h-screen bg-base-100 font-sans flex flex-col">
-      <Header onReset={handleReset} showReset={showResetButton}/>
+    <div className={`min-h-screen bg-base-100 ${fontClass} flex flex-col`}>
+      <Header onReset={handleReset} showReset={showResetButton} />
       <main className="flex-grow flex flex-col items-center justify-center p-4 md:p-8 animate-fade-in">
         {!originalImage && !isSizingCanvas && (
           <ImageUploader onImageUpload={handleImageUpload} />
@@ -101,7 +106,7 @@ const App: React.FC = () => {
               {isLoading && <Loader loadingType={loadingType} />}
               {error && (
                 <div className="text-center text-red-400">
-                  <h3 className="text-xl font-bold mb-2">Error</h3>
+                  <h3 className="text-xl font-bold mb-2">{t('error.title')}</h3>
                   <p>{error}</p>
                 </div>
               )}
@@ -116,8 +121,8 @@ const App: React.FC = () => {
                    <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto mb-4 opacity-30" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19 14.5M12 14.5v5.714c0 .597.237 1.17.659 1.591L17.25 21M12 14.5c-.251.023-.501.05-.75.082M7.5 12.572c.622.069 1.25.107 1.885.107L12 12.68v5.714a2.25 2.25 0 01-.659 1.591L7.5 21M5 10.25a2.25 2.25 0 012.25-2.25h.5a2.25 2.25 0 012.25 2.25v.25M19 10.25a2.25 2.25 0 00-2.25-2.25h-.5a2.25 2.25 0 00-2.25 2.25v.25" />
                    </svg>
-                  <h3 className="text-xl font-semibold">Your Creation Awaits</h3>
-                  <p className="mt-2 max-w-sm">Use the tools to edit your image, or enter a prompt to generate a poster. Your results will appear here.</p>
+                  <h3 className="text-xl font-semibold">{t('display.creation_awaits')}</h3>
+                  <p className="mt-2 max-w-sm">{t('display.creation_awaits_desc')}</p>
                 </div>
               )}
             </div>

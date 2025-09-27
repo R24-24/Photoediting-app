@@ -1,24 +1,27 @@
 import React from 'react';
+import { useTranslation } from '../hooks/useTranslation';
 
 interface LoaderProps {
     loadingType: 'image' | 'video';
 }
 
 const Loader: React.FC<LoaderProps> = ({ loadingType = 'image' }) => {
+    const { t } = useTranslation();
+
     const imageMessages = [
-        "Warming up the AI's creativity...",
-        "Mixing digital paints and pixels...",
-        "Consulting with the design muses...",
-        "Generating a masterpiece...",
-        "Finalizing the details...",
+        t('loader.image.1'),
+        t('loader.image.2'),
+        t('loader.image.3'),
+        t('loader.image.4'),
+        t('loader.image.5'),
     ];
     
     const videoMessages = [
-        "Setting up the digital film crew...",
-        "Animating your scene frame by frame...",
-        "This can take a minute, great art needs patience!",
-        "Rendering the video sequence...",
-        "Adding the final touches to your animation...",
+        t('loader.video.1'),
+        t('loader.video.2'),
+        t('loader.video.3'),
+        t('loader.video.4'),
+        t('loader.video.5'),
     ];
 
     const messages = loadingType === 'video' 
@@ -49,7 +52,7 @@ const Loader: React.FC<LoaderProps> = ({ loadingType = 'image' }) => {
             <div className="absolute inset-0 border-4 border-t-brand-primary border-l-brand-primary rounded-full animate-spin"></div>
         </div>
         <p className="mt-6 text-lg font-semibold text-gray-300 transition-opacity duration-500">{message}</p>
-        {isVideoProcess && <p className="text-sm text-gray-400 mt-2">Video generation is a complex process and may take a few minutes.</p>}
+        {isVideoProcess && <p className="text-sm text-gray-400 mt-2">{t('loader.video.subtitle')}</p>}
     </div>
   );
 };
