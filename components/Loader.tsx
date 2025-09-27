@@ -1,10 +1,10 @@
 import React from 'react';
 
 interface LoaderProps {
-    isEditing?: boolean;
+    isGeneratingVideo?: boolean;
 }
 
-const Loader: React.FC<LoaderProps> = ({ isEditing = false }) => {
+const Loader: React.FC<LoaderProps> = ({ isGeneratingVideo = false }) => {
     const imageMessages = [
         "Warming up the AI's creativity...",
         "Mixing digital paints and pixels...",
@@ -12,17 +12,17 @@ const Loader: React.FC<LoaderProps> = ({ isEditing = false }) => {
         "Generating a masterpiece...",
         "Finalizing the details...",
     ];
-
-    const editingMessages = [
-        "Analyzing your selection...",
-        "Applying AI magic to the masked area...",
-        "Retouching the pixels...",
-        "Seamlessly blending the changes...",
-        "Finalizing your edit...",
+    
+    const videoMessages = [
+        "Setting up the digital film crew...",
+        "Animating your scene frame by frame...",
+        "This can take a minute, great art needs patience!",
+        "Rendering the video sequence...",
+        "Adding the final touches to your animation...",
     ];
 
-    const messages = isEditing 
-        ? editingMessages 
+    const messages = isGeneratingVideo 
+        ? videoMessages 
         : imageMessages;
 
     const [message, setMessage] = React.useState(messages[0]);
@@ -35,7 +35,7 @@ const Loader: React.FC<LoaderProps> = ({ isEditing = false }) => {
                 const nextIndex = (currentIndex + 1) % messages.length;
                 return messages[nextIndex];
             });
-        }, 3000);
+        }, 4000); // Slower interval for video
 
         return () => clearInterval(intervalId);
     }, [messages]);
@@ -48,6 +48,7 @@ const Loader: React.FC<LoaderProps> = ({ isEditing = false }) => {
             <div className="absolute inset-0 border-4 border-t-brand-primary border-l-brand-primary rounded-full animate-spin"></div>
         </div>
         <p className="mt-6 text-lg font-semibold text-gray-300 transition-opacity duration-500">{message}</p>
+        {isGeneratingVideo && <p className="text-sm text-gray-400 mt-2">Video generation is a complex process and may take a few minutes.</p>}
     </div>
   );
 };

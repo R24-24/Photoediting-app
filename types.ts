@@ -5,7 +5,8 @@ export interface ImageData {
 }
 
 export interface GeneratedContent {
-  image: string | null;
+  media: string | null;
+  mediaType: 'image' | 'video' | null;
   text: string | null;
 }
 

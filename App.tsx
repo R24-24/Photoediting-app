@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
-import { ImageData, GeneratedContent } from './types';
-import { editImageWithPrompt } from './services/geminiService';
+import { GeneratedContent, ImageData } from './types';
+import { editImageWithPrompt, generateVideoFromImage } from './services/geminiService';
 import ImageUploader from './components/ImageUploader';
 import Editor from './components/Editor';
 import PosterDisplay from './components/PosterDisplay';
@@ -14,7 +14,7 @@ const App: React.FC = () => {
   const [isSizingCanvas, setIsSizingCanvas] = useState<boolean>(false);
   const [generatedContent, setGeneratedContent] = useState<GeneratedContent | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [loadingType, setLoadingType] = useState<'image' | 'video'>('image');
   const [error, setError] = useState<string | null>(null);
 
   const handleImageUpload = (imageData: ImageData) => {
@@ -44,46 +44,24 @@ const App: React.FC = () => {
     setIsSizingCanvas(false);
   }, []);
 
-  const handleApplyEdit = useCallback(async (prompt: string, maskBase64: string | null) => {
-    if (!originalImage) {
-      setError("Cannot apply edit, no image loaded.");
-      return;
-    }
-
-    setIsEditing(true);
-    setError(null);
-
-    try {
-      const result = await editImageWithPrompt(originalImage.base64, originalImage.mimeType, prompt, maskBase64);
-      if (result.image) {
-        const updatedImage = { ...originalImage, base64: result.image };
-        setOriginalImage(updatedImage);
-        setGeneratedContent(result);
-      } else {
-         // If only text is returned, display it without updating the image
-        setGeneratedContent(result);
-      }
-    } catch (e) {
-      const errorMessage = e instanceof Error ? e.message : "An unknown error occurred.";
-      setError(`Edit failed: ${errorMessage}`);
-      console.error(e);
-    } finally {
-      setIsEditing(false);
-    }
-  }, [originalImage]);
-
-  const handleGenerate = useCallback(async (prompt: string) => {
+  const handleGenerate = useCallback(async (prompt: string, outputType: 'Image' | 'Gif' | 'Video') => {
     if (!originalImage) {
       setError("Please upload an image first.");
       return;
     }
 
+    setLoadingType(outputType === 'Gif' ? 'video' : 'image');
     setIsLoading(true);
     setError(null);
     setGeneratedContent(null);
 
     try {
-      const result = await editImageWithPrompt(originalImage.base64, originalImage.mimeType, prompt, null);
+      let result: GeneratedContent;
+      if (outputType === 'Gif') {
+        result = await generateVideoFromImage(originalImage.base64, originalImage.mimeType, prompt);
+      } else {
+        result = await editImageWithPrompt(originalImage.base64, originalImage.mimeType, prompt, null);
+      }
       setGeneratedContent(result);
     } catch (e) {
       const errorMessage = e instanceof Error ? e.message : "An unknown error occurred.";
@@ -94,7 +72,6 @@ const App: React.FC = () => {
     }
   }, [originalImage]);
 
-  const currentLoadingState = isLoading || isEditing;
   const showResetButton = !!originalImage || isSizingCanvas;
 
   return (
@@ -118,24 +95,23 @@ const App: React.FC = () => {
             <Editor 
               originalImage={originalImage}
               onGenerate={handleGenerate}
-              onApplyEdit={handleApplyEdit}
-              isLoading={currentLoadingState}
+              isLoading={isLoading}
             />
             <div className="bg-base-200 rounded-2xl shadow-lg flex flex-col items-center justify-center p-6 min-h-[400px] lg:min-h-[600px] border border-base-300">
-              {currentLoadingState && <Loader isEditing={isEditing} />}
+              {isLoading && <Loader isGeneratingVideo={loadingType === 'video'} />}
               {error && (
                 <div className="text-center text-red-400">
                   <h3 className="text-xl font-bold mb-2">Error</h3>
                   <p>{error}</p>
                 </div>
               )}
-              {!currentLoadingState && !error && generatedContent && (
+              {!isLoading && !error && generatedContent && (
                  <PosterDisplay 
                     generatedContent={generatedContent} 
                     originalImageName={originalImage.name}
                 />
               )}
-              {!currentLoadingState && !error && !generatedContent && (
+              {!isLoading && !error && !generatedContent && (
                 <div className="text-center text-gray-400">
                    <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto mb-4 opacity-30" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19 14.5M12 14.5v5.714c0 .597.237 1.17.659 1.591L17.25 21M12 14.5c-.251.023-.501.05-.75.082M7.5 12.572c.622.069 1.25.107 1.885.107L12 12.68v5.714a2.25 2.25 0 01-.659 1.591L7.5 21M5 10.25a2.25 2.25 0 012.25-2.25h.5a2.25 2.25 0 012.25 2.25v.25M19 10.25a2.25 2.25 0 00-2.25-2.25h-.5a2.25 2.25 0 00-2.25 2.25v.25" />
