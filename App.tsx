@@ -44,25 +44,25 @@ const App: React.FC = () => {
     setIsSizingCanvas(false);
   }, []);
 
-  const handleGenerate = useCallback(async (prompt: string, outputType: 'Image' | 'Gif' | 'Video') => {
+  const handleGenerate = useCallback(async (prompt: string, outputType: 'Image' | 'Video') => {
     if (!originalImage) {
       setError("Please upload an image first.");
       return;
     }
 
-    setLoadingType(outputType === 'Gif' ? 'video' : 'image');
+    setLoadingType(outputType === 'Image' ? 'image' : 'video');
     setIsLoading(true);
     setError(null);
     setGeneratedContent(null);
 
     try {
-      let result: GeneratedContent;
-      if (outputType === 'Gif') {
-        result = await generateVideoFromImage(originalImage.base64, originalImage.mimeType, prompt);
-      } else {
-        result = await editImageWithPrompt(originalImage.base64, originalImage.mimeType, prompt, null);
+      if (outputType === 'Video') {
+        const result = await generateVideoFromImage(originalImage.base64, originalImage.mimeType, prompt, originalImage.width, originalImage.height);
+        setGeneratedContent(result);
+      } else { // 'Image'
+        const result = await editImageWithPrompt(originalImage.base64, originalImage.mimeType, prompt, null);
+        setGeneratedContent(result);
       }
-      setGeneratedContent(result);
     } catch (e) {
       const errorMessage = e instanceof Error ? e.message : "An unknown error occurred.";
       setError(`Generation failed: ${errorMessage}`);
@@ -98,7 +98,7 @@ const App: React.FC = () => {
               isLoading={isLoading}
             />
             <div className="bg-base-200 rounded-2xl shadow-lg flex flex-col items-center justify-center p-6 min-h-[400px] lg:min-h-[600px] border border-base-300">
-              {isLoading && <Loader isGeneratingVideo={loadingType === 'video'} />}
+              {isLoading && <Loader loadingType={loadingType} />}
               {error && (
                 <div className="text-center text-red-400">
                   <h3 className="text-xl font-bold mb-2">Error</h3>

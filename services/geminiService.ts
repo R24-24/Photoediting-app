@@ -75,6 +75,10 @@ export async function editImageWithPrompt(
     return { media: generatedImage, mediaType: 'image', text: generatedText };
   } catch (error) {
     console.error("Error calling Gemini API:", error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    if (errorMessage.toLowerCase().includes("quota") || errorMessage.includes("429") || errorMessage.toLowerCase().includes("resource_exhausted")) {
+        throw new Error("API quota exceeded. This can happen due to high demand or usage limits on the API key. Please try again later.");
+    }
     throw new Error("Failed to generate image. Please check your prompt and try again.");
   }
 }
@@ -83,12 +87,24 @@ export async function editImageWithPrompt(
 export async function generateVideoFromImage(
   base64ImageData: string,
   mimeType: string,
-  prompt: string
+  prompt: string,
+  width?: number,
+  height?: number
 ): Promise<GeneratedContent> {
   try {
+    let animationPrompt = `Create a 3-second looping video from the image. The main subject of the original photo should remain mostly static. Animate the background with subtle motion (like gentle zoom, pan, or particle effects) and animate any text elements with a simple, elegant effect (like a gentle fade-in or shimmer).`;
+
+    if (width && height) {
+        animationPrompt += ` The output video resolution must be exactly ${width} pixels wide and ${height} pixels high. Do not alter the aspect ratio.`;
+    } else {
+        animationPrompt += ` Maintain the original aspect ratio.`;
+    }
+
+    animationPrompt += ` ${prompt}`;
+
     let operation = await ai.models.generateVideos({
       model: 'veo-2.0-generate-001',
-      prompt: `${prompt}, 3 second seamless loop, high quality`,
+      prompt: animationPrompt,
       image: {
         imageBytes: base64ImageData,
         mimeType: mimeType,
@@ -120,11 +136,15 @@ export async function generateVideoFromImage(
     return {
       media: videoBase64,
       mediaType: 'video',
-      text: `Animated GIF for: ${prompt}`,
+      text: `Animated media for: ${prompt}`,
     };
 
   } catch (error) {
     console.error("Error calling Veo API:", error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    if (errorMessage.includes("429") || errorMessage.toLowerCase().includes("quota") || errorMessage.toLowerCase().includes("resource_exhausted")) {
+        throw new Error("API quota exceeded. This can happen due to high demand or usage limits on the API key. Please try again later.");
+    }
     throw new Error("Failed to generate video. This feature is experimental and may not always succeed. Please try a different prompt.");
   }
 }

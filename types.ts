@@ -2,6 +2,8 @@ export interface ImageData {
   base64: string;
   mimeType: string;
   name: string;
+  width?: number;
+  height?: number;
 }
 
 export interface GeneratedContent {

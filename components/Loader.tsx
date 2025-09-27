@@ -1,10 +1,10 @@
 import React from 'react';
 
 interface LoaderProps {
-    isGeneratingVideo?: boolean;
+    loadingType: 'image' | 'video';
 }
 
-const Loader: React.FC<LoaderProps> = ({ isGeneratingVideo = false }) => {
+const Loader: React.FC<LoaderProps> = ({ loadingType = 'image' }) => {
     const imageMessages = [
         "Warming up the AI's creativity...",
         "Mixing digital paints and pixels...",
@@ -21,7 +21,7 @@ const Loader: React.FC<LoaderProps> = ({ isGeneratingVideo = false }) => {
         "Adding the final touches to your animation...",
     ];
 
-    const messages = isGeneratingVideo 
+    const messages = loadingType === 'video' 
         ? videoMessages 
         : imageMessages;
 
@@ -35,11 +35,12 @@ const Loader: React.FC<LoaderProps> = ({ isGeneratingVideo = false }) => {
                 const nextIndex = (currentIndex + 1) % messages.length;
                 return messages[nextIndex];
             });
-        }, 4000); // Slower interval for video
+        }, 4000); 
 
         return () => clearInterval(intervalId);
     }, [messages]);
 
+  const isVideoProcess = loadingType === 'video';
 
   return (
     <div className="text-center animate-fade-in">
@@ -48,7 +49,7 @@ const Loader: React.FC<LoaderProps> = ({ isGeneratingVideo = false }) => {
             <div className="absolute inset-0 border-4 border-t-brand-primary border-l-brand-primary rounded-full animate-spin"></div>
         </div>
         <p className="mt-6 text-lg font-semibold text-gray-300 transition-opacity duration-500">{message}</p>
-        {isGeneratingVideo && <p className="text-sm text-gray-400 mt-2">Video generation is a complex process and may take a few minutes.</p>}
+        {isVideoProcess && <p className="text-sm text-gray-400 mt-2">Video generation is a complex process and may take a few minutes.</p>}
     </div>
   );
 };

@@ -68,7 +68,9 @@ const CanvasSizer: React.FC<CanvasSizerProps> = ({ imageData, onConfirm, onCance
                 onConfirm({
                     ...imageData,
                     base64: newBase64,
-                    mimeType: 'image/png' // Always png from canvas
+                    mimeType: 'image/png', // Always png from canvas
+                    width,
+                    height,
                 });
             }
             setIsProcessing(false);

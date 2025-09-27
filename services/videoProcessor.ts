@@ -8,7 +8,8 @@ interface FFmpegInstance {
 
 interface FFmpegGlobal {
     createFFmpeg: (options: any) => FFmpegInstance;
-    fetchFile: (data: Blob | File) => Promise<Uint8Array>;
+    // FIX: Update fetchFile to match the definition in gifProcessor.ts to resolve global type conflict.
+    fetchFile: (data: Blob | File | Uint8Array) => Promise<Uint8Array>;
 }
 
 declare global {
@@ -31,7 +32,7 @@ async function getFFmpeg(): Promise<FFmpegInstance> {
   const { createFFmpeg } = window.FFmpeg;
   ffmpegInstance = createFFmpeg({
     log: false, // Set to true for debugging
-    corePath: 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/ffmpeg-core.js',
+    corePath: 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/ffmpeg-core.js',
   });
 
   if (!ffmpegInstance.isLoaded()) {
