@@ -12,12 +12,6 @@ export interface GeneratedContent {
   text: string | null;
 }
 
-export interface CustomTextConfig {
-  text: string;
-  color: string;
-  fontSize: number;
-}
-
 export type ToolType = 'select' | 'magic-edit' | 'crop' | 'adjust' | 'text' | 'filter';
 
 export interface PosterLogo {

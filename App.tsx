@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { GeneratedContent, ImageData, PosterLogo, CustomTextConfig } from './types';
+import { GeneratedContent, ImageData, PosterLogo } from './types';
 import { editImageWithPrompt, generateVideoFromImage } from './services/geminiService';
 import ImageUploader from './components/ImageUploader';
 import Editor from './components/Editor';
@@ -17,10 +17,10 @@ const App: React.FC = () => {
   const [imageToSize, setImageToSize] = useState<ImageData | null>(null);
   const [isSizingCanvas, setIsSizingCanvas] = useState<boolean>(false);
   const [generatedContent, setGeneratedContent] = useState<GeneratedContent | null>(null);
-  const [customTextConfig, setCustomTextConfig] = useState<CustomTextConfig | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [loadingType, setLoadingType] = useState<'image' | 'video'>('image');
   const [error, setError] = useState<string | null>(null);
+  const [tokens, setTokens] = useState<number>(10);
   const { language } = useLanguage();
   const { t } = useTranslation();
 
@@ -28,16 +28,29 @@ const App: React.FC = () => {
     setImageToSize(imageData);
     setIsSizingCanvas(true);
     setGeneratedContent(null);
-    setCustomTextConfig(null);
     setError(null);
   };
   
+  const handleReset = useCallback(() => {
+    setOriginalImage(null);
+    setImageToSize(null);
+    setIsSizingCanvas(false);
+    setGeneratedContent(null);
+    setError(null);
+  }, []);
+
+  const handleSignInSuccess = () => {
+    setIsAuthenticated(true);
+    // In a real app, you'd fetch this from your backend.
+    // For now, we simulate a daily reset on login.
+    setTokens(10);
+  };
+
   const handleSignOut = useCallback(() => {
     setOriginalImage(null);
     setImageToSize(null);
     setIsSizingCanvas(false);
     setGeneratedContent(null);
-    setCustomTextConfig(null);
     setError(null);
     setIsLoading(false);
     setIsAuthenticated(false);
@@ -54,7 +67,11 @@ const App: React.FC = () => {
     setIsSizingCanvas(false);
   }, []);
 
-  const handleGenerate = useCallback(async (prompt: string, outputType: 'Image' | 'Video', logoForPoster: PosterLogo | null, textConfig: CustomTextConfig | null) => {
+  const handleGenerate = useCallback(async (prompt: string, outputType: 'Image' | 'Video', logoForPoster: PosterLogo | null) => {
+    if (tokens <= 0) {
+      setError("You have run out of daily tokens. Please try again tomorrow.");
+      return;
+    }
     if (!originalImage) {
       setError("Please upload an image first.");
       return;
@@ -64,7 +81,9 @@ const App: React.FC = () => {
     setIsLoading(true);
     setError(null);
     setGeneratedContent(null);
-    setCustomTextConfig(textConfig);
+
+    // Optimistically deduct token. It will be refunded on failure.
+    setTokens(prev => prev - 1);
 
     try {
       if (outputType === 'Video') {
@@ -83,22 +102,24 @@ const App: React.FC = () => {
         setGeneratedContent(result);
       }
     } catch (e) {
+      // Refund token on failure
+      setTokens(prev => prev + 1);
       const errorMessage = e instanceof Error ? e.message : "An unknown error occurred.";
       setError(`Generation failed: ${errorMessage}`);
       console.error(e);
     } finally {
       setIsLoading(false);
     }
-  }, [originalImage]);
+  }, [originalImage, tokens]);
 
   const fontClass = language === 'en' ? 'font-sans' : 'font-devanari';
 
   return (
     <div className={`min-h-screen bg-base-100 ${fontClass} flex flex-col`}>
-      <Header onSignOut={handleSignOut} showSignOut={isAuthenticated} />
+      <Header onSignOut={handleSignOut} showSignOut={isAuthenticated} tokens={tokens} />
       <main className="flex-grow flex flex-col items-center justify-center p-4 md:p-8 animate-fade-in">
         {!isAuthenticated ? (
-            <Auth onSignInSuccess={() => setIsAuthenticated(true)} />
+            <Auth onSignInSuccess={handleSignInSuccess} />
         ) : (
             <>
                 {!originalImage && !isSizingCanvas && (
@@ -119,6 +140,8 @@ const App: React.FC = () => {
                       originalImage={originalImage}
                       onGenerate={handleGenerate}
                       isLoading={isLoading}
+                      onReset={handleReset}
+                      tokens={tokens}
                     />
                     <div className="bg-base-200 rounded-2xl shadow-lg flex flex-col items-center justify-center p-6 min-h-[400px] lg:min-h-[600px] border border-base-300">
                       {isLoading && <Loader loadingType={loadingType} />}
@@ -132,7 +155,6 @@ const App: React.FC = () => {
                          <PosterDisplay 
                             generatedContent={generatedContent} 
                             originalImageName={originalImage.name}
-                            customTextConfig={customTextConfig}
                         />
                       )}
                       {!isLoading && !error && !generatedContent && (

@@ -1,53 +1,15 @@
-import React, { useState, useRef, MouseEvent } from 'react';
-import { GeneratedContent, CustomTextConfig } from '../types';
+import React from 'react';
+import { GeneratedContent } from '../types';
 import { useTranslation } from '../hooks/useTranslation';
 
 interface PosterDisplayProps {
   generatedContent: GeneratedContent;
   originalImageName: string;
-  customTextConfig: CustomTextConfig | null;
 }
 
-const PosterDisplay: React.FC<PosterDisplayProps> = ({ generatedContent, originalImageName, customTextConfig }) => {
+const PosterDisplay: React.FC<PosterDisplayProps> = ({ generatedContent, originalImageName }) => {
     const { media, mediaType, text } = generatedContent;
     const { t } = useTranslation();
-
-    const imageContainerRef = useRef<HTMLDivElement>(null);
-    const displayedImageRef = useRef<HTMLImageElement>(null);
-    const draggableTextRef = useRef<HTMLDivElement>(null);
-
-    const [position, setPosition] = useState({ x: 20, y: 20 });
-    const [isDragging, setIsDragging] = useState(false);
-    const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-
-    const handleMouseDown = (e: MouseEvent<HTMLDivElement>) => {
-        if (!imageContainerRef.current) return;
-        e.preventDefault();
-        setIsDragging(true);
-        const containerRect = imageContainerRef.current.getBoundingClientRect();
-        setDragStart({
-            x: e.clientX - containerRect.left - position.x,
-            y: e.clientY - containerRect.top - position.y,
-        });
-    };
-    
-    const handleMouseMove = (e: MouseEvent<HTMLDivElement>) => {
-        if (!isDragging || !imageContainerRef.current || !draggableTextRef.current) return;
-        e.preventDefault();
-        const containerRect = imageContainerRef.current.getBoundingClientRect();
-        let newX = e.clientX - containerRect.left - dragStart.x;
-        let newY = e.clientY - containerRect.top - dragStart.y;
-        
-        // Boundary checks to keep the text within the container
-        newX = Math.max(0, Math.min(newX, containerRect.width - draggableTextRef.current.offsetWidth));
-        newY = Math.max(0, Math.min(newY, containerRect.height - draggableTextRef.current.offsetHeight));
-
-        setPosition({ x: newX, y: newY });
-    };
-
-    const handleMouseUp = () => {
-        setIsDragging(false);
-    };
 
     const handleDownload = () => {
         if (!media) return;
@@ -56,82 +18,20 @@ const PosterDisplay: React.FC<PosterDisplayProps> = ({ generatedContent, origina
         nameParts.pop(); // remove extension
         const name = nameParts.join('.');
 
-        if (mediaType === 'video') {
-            const link = document.createElement('a');
-            link.href = `data:video/mp4;base64,${media}`;
-            link.download = `${name}-animation.mp4`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            return;
-        }
-
-        const image = new Image();
-        image.onload = () => {
-            const canvas = document.createElement('canvas');
-            canvas.width = image.naturalWidth;
-            canvas.height = image.naturalHeight;
-            const ctx = canvas.getContext('2d');
-            if (!ctx) return;
-
-            ctx.drawImage(image, 0, 0);
-
-            if (customTextConfig?.text && imageContainerRef.current && displayedImageRef.current) {
-                const container = imageContainerRef.current;
-                const displayedImg = displayedImageRef.current;
-
-                // Scale factor between displayed image and original image
-                const scale = image.naturalWidth / displayedImg.clientWidth;
-
-                // Calculate the offset of the displayed image within its container (for letterboxing)
-                const imgOffsetX = (container.clientWidth - displayedImg.clientWidth) / 2;
-                const imgOffsetY = (container.clientHeight - displayedImg.clientHeight) / 2;
-
-                // Calculate the text's position relative to the top-left of the image
-                const textX_relative = position.x - imgOffsetX;
-                const textY_relative = position.y - imgOffsetY;
-
-                // Scale the position and font size for the canvas
-                const canvasX = textX_relative * scale;
-                const canvasY = textY_relative * scale;
-                const canvasFontSize = customTextConfig.fontSize * scale;
-                const lineHeight = canvasFontSize * 1.1; // Match CSS line-height
-                const lines = customTextConfig.text.split('\n');
-
-                // Set styles on the canvas context to match the displayed text
-                ctx.font = `bold ${canvasFontSize}px 'Poppins', sans-serif`;
-                ctx.fillStyle = customTextConfig.color;
-                ctx.textBaseline = 'top';
-                ctx.shadowColor = 'rgba(0,0,0,0.5)';
-                ctx.shadowBlur = 3 * scale;
-                ctx.shadowOffsetX = 1 * scale;
-                ctx.shadowOffsetY = 1 * scale;
-
-                // Draw each line of text
-                lines.forEach((line, index) => {
-                    ctx.fillText(line, canvasX, canvasY + (index * lineHeight));
-                });
-            }
-            
-            const link = document.createElement('a');
-            link.href = canvas.toDataURL('image/png');
-            link.download = `${name}-poster.png`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        };
-        image.src = `data:image/png;base64,${media}`;
+        const mimeType = mediaType === 'video' ? 'video/mp4' : 'image/png';
+        const extension = mediaType === 'video' ? 'mp4' : 'png';
+        const link = document.createElement('a');
+        link.href = `data:${mimeType};base64,${media}`;
+        link.download = `${name}-${mediaType === 'video' ? 'animation' : 'poster'}.${extension}`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     };
-
 
   return (
     <div className="w-full h-full flex flex-col items-center justify-between space-y-4 animate-fade-in">
         <div 
-            ref={imageContainerRef}
             className="relative flex-grow flex items-center justify-center w-full min-h-0"
-            onMouseMove={handleMouseMove} 
-            onMouseUp={handleMouseUp}
-            onMouseLeave={handleMouseUp} // Stop dragging if mouse leaves container
         >
             {mediaType === 'video' && media ? (
                 <video
@@ -143,35 +43,11 @@ const PosterDisplay: React.FC<PosterDisplayProps> = ({ generatedContent, origina
                     className="max-h-full max-w-full object-contain rounded-lg"
                 />
             ) : mediaType === 'image' && media ? (
-                 <>
-                    <img
-                        ref={displayedImageRef}
-                        src={`data:image/png;base64,${media}`}
-                        alt="Generated poster"
-                        className="max-h-full max-w-full object-contain rounded-lg pointer-events-none"
-                    />
-                    {customTextConfig?.text && (
-                        <div
-                            ref={draggableTextRef}
-                            onMouseDown={handleMouseDown}
-                            className="absolute p-2 select-none"
-                            style={{
-                                left: `${position.x}px`,
-                                top: `${position.y}px`,
-                                color: customTextConfig.color,
-                                fontSize: `${customTextConfig.fontSize}px`,
-                                fontFamily: "'Poppins', sans-serif",
-                                fontWeight: 'bold',
-                                cursor: isDragging ? 'grabbing' : 'grab',
-                                textShadow: '0px 1px 3px rgba(0,0,0,0.5)',
-                                whiteSpace: 'pre-wrap',
-                                lineHeight: '1.1',
-                            }}
-                        >
-                            {customTextConfig.text}
-                        </div>
-                    )}
-                 </>
+                 <img
+                    src={`data:image/png;base64,${media}`}
+                    alt="Generated poster"
+                    className="max-h-full max-w-full object-contain rounded-lg pointer-events-none"
+                />
             ) : (
                 <div className="p-4 bg-base-300 rounded-lg max-w-full overflow-y-auto">
                     <p className="text-gray-200 whitespace-pre-wrap">{text}</p>

@@ -76,16 +76,20 @@ export async function editImageWithPrompt(
       return { media: generatedImage, mediaType: 'image', text: generatedText };
 
     } else {
-      // Path for Poster Generation (subject preservation) - OPTIMIZED to 1 API call
-      
-      const finalPrompt = `Carefully identify the main subject in the provided image. Your task is to replace ONLY the background with a new one based on the following description: '${prompt}'. The original subject must be perfectly preserved without any changes and seamlessly composited onto the new background. Ensure the final composition is realistic. Do not add any text.`;
-      
+      // Path for Poster Generation. The prompt from the editor now contains all instructions.
       const imagePart = { inlineData: { data: base64ImageData, mimeType } };
-      const textPart = { text: finalPrompt };
+      const textPart = { text: prompt };
+      
+      const parts = [imagePart, textPart];
+
+      if (logo) {
+          const logoPart = { inlineData: { data: logo.base64, mimeType: logo.mimeType } };
+          parts.push(logoPart);
+      }
 
       const response = await retryWithBackoff(() => ai.models.generateContent({
         model: 'gemini-2.5-flash-image-preview',
-        contents: { parts: [imagePart, textPart] },
+        contents: { parts },
         config: { responseModalities: [Modality.IMAGE, Modality.TEXT] },
       }));
       
