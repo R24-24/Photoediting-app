@@ -18,3 +18,9 @@ export interface PosterLogo {
     base64: string;
     mimeType: string;
 }
+
+export interface Purchase {
+    date: string;
+    tokens: number;
+    amount: number;
+}

@@ -1,5 +1,5 @@
-import React, { useState, useCallback } from 'react';
-import { GeneratedContent, ImageData, PosterLogo } from './types';
+import React, { useState, useCallback, useEffect } from 'react';
+import { GeneratedContent, ImageData, PosterLogo, Purchase } from './types';
 import { editImageWithPrompt, generateVideoFromImage } from './services/geminiService';
 import ImageUploader from './components/ImageUploader';
 import Editor from './components/Editor';
@@ -10,6 +10,7 @@ import CanvasSizer from './components/CanvasSizer';
 import { useLanguage } from './context/LanguageContext';
 import { useTranslation } from './hooks/useTranslation';
 import Auth from './components/Auth';
+import PurchaseHistoryModal from './components/PurchaseHistoryModal';
 
 const App: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
@@ -20,9 +21,50 @@ const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [loadingType, setLoadingType] = useState<'image' | 'video'>('image');
   const [error, setError] = useState<string | null>(null);
-  const [tokens, setTokens] = useState<number>(10);
+  
+  const [tokens, setTokens] = useState<number>(3);
+  const [lockoutEndTime, setLockoutEndTime] = useState<number | null>(null);
+  const [timeUntilReset, setTimeUntilReset] = useState<string>('');
+  const [purchaseHistory, setPurchaseHistory] = useState<Purchase[]>([]);
+  const [isHistoryModalOpen, setIsHistoryModalOpen] = useState<boolean>(false);
+
   const { language } = useLanguage();
   const { t } = useTranslation();
+
+  useEffect(() => {
+    if (!isAuthenticated || !lockoutEndTime) {
+        setTimeUntilReset('');
+        return;
+    }
+
+    const intervalId = setInterval(() => {
+        const now = Date.now();
+        const timeLeft = lockoutEndTime - now;
+
+        if (timeLeft <= 0) {
+            setTokens(prev => {
+                const newTokens = prev + 3;
+                localStorage.setItem('tokens', String(newTokens));
+                return newTokens;
+            });
+            setLockoutEndTime(null);
+            localStorage.removeItem('lockoutEndTime');
+            setTimeUntilReset('');
+            clearInterval(intervalId);
+        } else {
+            const hours = Math.floor(timeLeft / (1000 * 60 * 60));
+            const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+            
+            setTimeUntilReset(
+                `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
+            );
+        }
+    }, 1000);
+
+    return () => clearInterval(intervalId);
+  }, [isAuthenticated, lockoutEndTime]);
+
 
   const handleImageUpload = (imageData: ImageData) => {
     setImageToSize(imageData);
@@ -41,9 +83,24 @@ const App: React.FC = () => {
 
   const handleSignInSuccess = () => {
     setIsAuthenticated(true);
-    // In a real app, you'd fetch this from your backend.
-    // For now, we simulate a daily reset on login.
-    setTokens(10);
+    const storedTokens = localStorage.getItem('tokens');
+    const storedLockoutTime = localStorage.getItem('lockoutEndTime');
+    const storedHistory = localStorage.getItem('purchaseHistory');
+
+    const lockoutTime = storedLockoutTime ? parseInt(storedLockoutTime, 10) : null;
+
+    if (lockoutTime && Date.now() >= lockoutTime) {
+      const currentTokens = storedTokens ? parseInt(storedTokens, 10) : 0;
+      const newTokens = currentTokens + 3;
+      setTokens(newTokens);
+      localStorage.setItem('tokens', String(newTokens));
+      setLockoutEndTime(null);
+      localStorage.removeItem('lockoutEndTime');
+    } else {
+      setTokens(storedTokens ? parseInt(storedTokens, 10) : 3);
+      setLockoutEndTime(lockoutTime);
+    }
+    setPurchaseHistory(storedHistory ? JSON.parse(storedHistory) : []);
   };
 
   const handleSignOut = useCallback(() => {
@@ -69,7 +126,6 @@ const App: React.FC = () => {
 
   const handleGenerate = useCallback(async (prompt: string, outputType: 'Image' | 'Video', logoForPoster: PosterLogo | null) => {
     if (tokens <= 0) {
-      setError("You have run out of daily tokens. Please try again tomorrow.");
       return;
     }
     if (!originalImage) {
@@ -82,8 +138,16 @@ const App: React.FC = () => {
     setError(null);
     setGeneratedContent(null);
 
-    // Optimistically deduct token. It will be refunded on failure.
-    setTokens(prev => prev - 1);
+    const originalTokenCount = tokens;
+    const newTokenCount = originalTokenCount - 1;
+    setTokens(newTokenCount);
+    localStorage.setItem('tokens', String(newTokenCount));
+
+    if (newTokenCount === 0) {
+        const newLockoutEndTime = Date.now() + 24 * 60 * 60 * 1000;
+        setLockoutEndTime(newLockoutEndTime);
+        localStorage.setItem('lockoutEndTime', String(newLockoutEndTime));
+    }
 
     try {
       if (outputType === 'Video') {
@@ -102,26 +166,58 @@ const App: React.FC = () => {
         setGeneratedContent(result);
       }
     } catch (e) {
-      // Refund token on failure
-      setTokens(prev => prev + 1);
+      setTokens(originalTokenCount);
+      localStorage.setItem('tokens', String(originalTokenCount));
+      // If we just entered lockout on this failed attempt, cancel it
+      if (newTokenCount === 0 && lockoutEndTime) {
+        setLockoutEndTime(null);
+        localStorage.removeItem('lockoutEndTime');
+      }
       const errorMessage = e instanceof Error ? e.message : "An unknown error occurred.";
       setError(`Generation failed: ${errorMessage}`);
       console.error(e);
     } finally {
       setIsLoading(false);
     }
-  }, [originalImage, tokens]);
+  }, [originalImage, tokens, lockoutEndTime]);
+  
+  const handleBuyTokens = useCallback((tokensToAdd: number, amount: number) => {
+    const newTokens = tokens + tokensToAdd;
+    setTokens(newTokens);
+    localStorage.setItem('tokens', String(newTokens));
+
+    const newPurchase: Purchase = {
+        date: new Date().toISOString(),
+        tokens: tokensToAdd,
+        amount,
+    };
+    const updatedHistory = [newPurchase, ...purchaseHistory];
+    setPurchaseHistory(updatedHistory);
+    localStorage.setItem('purchaseHistory', JSON.stringify(updatedHistory));
+  }, [tokens, purchaseHistory]);
+
 
   const fontClass = language === 'en' ? 'font-sans' : 'font-devanari';
 
   return (
     <div className={`min-h-screen bg-base-100 ${fontClass} flex flex-col`}>
-      <Header onSignOut={handleSignOut} showSignOut={isAuthenticated} tokens={tokens} />
+      <Header 
+        onSignOut={handleSignOut} 
+        showSignOut={isAuthenticated} 
+        tokens={tokens} 
+        timeUntilReset={timeUntilReset}
+        onShowHistory={() => setIsHistoryModalOpen(true)}
+      />
       <main className="flex-grow flex flex-col items-center justify-center p-4 md:p-8 animate-fade-in">
         {!isAuthenticated ? (
             <Auth onSignInSuccess={handleSignInSuccess} />
         ) : (
             <>
+                <PurchaseHistoryModal 
+                    isOpen={isHistoryModalOpen}
+                    onClose={() => setIsHistoryModalOpen(false)}
+                    history={purchaseHistory}
+                />
                 {!originalImage && !isSizingCanvas && (
                   <ImageUploader onImageUpload={handleImageUpload} />
                 )}
@@ -142,6 +238,8 @@ const App: React.FC = () => {
                       isLoading={isLoading}
                       onReset={handleReset}
                       tokens={tokens}
+                      timeUntilReset={timeUntilReset}
+                      onBuyTokens={handleBuyTokens}
                     />
                     <div className="bg-base-200 rounded-2xl shadow-lg flex flex-col items-center justify-center p-6 min-h-[400px] lg:min-h-[600px] border border-base-300">
                       {isLoading && <Loader loadingType={loadingType} />}

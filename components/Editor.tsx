@@ -9,6 +9,8 @@ interface EditorProps {
   isLoading: boolean;
   onReset: () => void;
   tokens: number;
+  timeUntilReset?: string;
+  onBuyTokens: (tokens: number, amount: number) => void;
 }
 
 const styleTemplates = [
@@ -23,7 +25,7 @@ const styleTemplates = [
 
 type OutputType = 'Image' | 'Video';
 
-const Editor: React.FC<EditorProps> = ({ originalImage, onGenerate, isLoading, onReset, tokens }) => {
+const Editor: React.FC<EditorProps> = ({ originalImage, onGenerate, isLoading, onReset, tokens, timeUntilReset, onBuyTokens }) => {
   const { t } = useTranslation();
   const { eventTemplates, festivalTemplates, businessTemplates } = useTemplates();
   const logoInputRef = useRef<HTMLInputElement>(null);
@@ -378,10 +380,34 @@ ${dimensionInstruction}- Main Subject: Use the main subject from the provided im
                     </>
                 )}
             </button>
-            {tokens <= 0 && !isLoading && (
-                <p className="text-center text-yellow-500 text-sm mt-3 animate-fade-in">
-                    You have run out of daily tokens. They will reset tomorrow.
-                </p>
+            {tokens <= 0 && timeUntilReset && !isLoading && (
+                <div className="text-center p-4 bg-yellow-900/20 border border-yellow-700 rounded-lg mt-4 space-y-3 animate-fade-in">
+                    <p className="text-yellow-400 font-semibold">
+                        You've run out of free daily tokens.
+                    </p>
+                    <p className="text-gray-300 text-sm">
+                        Your free tokens will reset in: <span className="font-bold text-white">{timeUntilReset}</span>
+                    </p>
+                    <p className="text-gray-300 text-sm font-semibold pt-2 border-t border-yellow-700/50">
+                        Or refill now:
+                    </p>
+                    <div className="flex gap-4">
+                        <button
+                            type="button"
+                            onClick={() => onBuyTokens(5, 10)}
+                            className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold py-2 px-4 rounded-lg hover:opacity-90 transition-opacity duration-300 transform hover:scale-105"
+                        >
+                            Buy 5 Tokens (₹10)
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => onBuyTokens(50, 25)}
+                            className="flex-1 bg-gradient-to-r from-sky-500 to-indigo-600 text-white font-bold py-2 px-4 rounded-lg hover:opacity-90 transition-opacity duration-300 transform hover:scale-105"
+                        >
+                            Buy 50 Tokens (₹25)
+                        </button>
+                    </div>
+                </div>
             )}
         </form>
     </div>
