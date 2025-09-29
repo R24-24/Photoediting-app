@@ -1,6 +1,6 @@
 
 {
-  "header.title": "Social Poster",
+  "header.title": "PhotoForge",
   "header.sign_out": "Sign Out",
   "auth.title": "Sign in to Continue",
   "auth.signInWithGoogle": "Sign in with Google",
@@ -46,6 +46,7 @@
   "editor.style": "Add Style (Optional)",
   "editor.upload_logo": "Upload Logo (Optional)",
   "editor.edit_footer": "Edit Footer (Optional)",
+  "editor.add_text": "Add Your Text",
   "editor.remove_logo": "Remove Logo",
   "editor.generate_poster": "Generate Poster",
   "editor.generate_video": "Generate Video",
@@ -90,6 +91,7 @@
   "templates.business.agency": "Marketing Agency",
   "templates.business.real_estate": "Real Estate",
   "templates.business.fashion": "Fashion Retail",
+  "templates.business.product_advertising": "Product Advertising",
   "templates.fields.brideGroom": "Bride & Groom Names",
   "templates.fields.date": "Date & Time",
   "templates.fields.venue": "Venue",

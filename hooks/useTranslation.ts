@@ -6,7 +6,7 @@ import { useLanguage } from '../context/LanguageContext';
 // This is the most compatible way to handle static translation data without a bundler.
 
 const en = {
-  "header.title": "Social Poster",
+  "header.title": "PhotoForge",
   "header.sign_out": "Sign Out",
   "auth.title": "Sign in to Continue",
   "auth.signInWithGoogle": "Sign in with Google",
@@ -52,6 +52,7 @@ const en = {
   "editor.style": "Add Style (Optional)",
   "editor.upload_logo": "Upload Logo (Optional)",
   "editor.edit_footer": "Edit Footer (Optional)",
+  "editor.add_text": "Add Your Text",
   "editor.remove_logo": "Remove Logo",
   "editor.generate_poster": "Generate Poster",
   "editor.generate_video": "Generate Video",
@@ -96,6 +97,7 @@ const en = {
   "templates.business.agency": "Marketing Agency",
   "templates.business.real_estate": "Real Estate",
   "templates.business.fashion": "Fashion Retail",
+  "templates.business.product_advertising": "Product Advertising",
   "templates.fields.brideGroom": "Bride & Groom Names",
   "templates.fields.date": "Date & Time",
   "templates.fields.venue": "Venue",
@@ -147,7 +149,7 @@ const en = {
 };
 
 const hi = {
-  "header.title": "सोशल पोस्टर",
+  "header.title": "फोटोफोर्ज",
   "header.sign_out": "साइन आउट करें",
   "auth.title": "जारी रखने के लिए साइन इन करें",
   "auth.signInWithGoogle": "Google के साथ साइन इन करें",
@@ -193,6 +195,7 @@ const hi = {
   "editor.style": "शैली जोड़ें (वैकल्पिक)",
   "editor.upload_logo": "लोगो अपलोड करें (वैकल्पिक)",
   "editor.edit_footer": "फुटर संपादित करें (वैकल्पिक)",
+  "editor.add_text": "अपना टेक्स्ट जोड़ें",
   "editor.remove_logo": "लोगो हटाएं",
   "editor.generate_poster": "पोस्टर बनाएं",
   "editor.generate_video": "वीडियो बनाएं",
@@ -237,6 +240,7 @@ const hi = {
   "templates.business.agency": "मार्केटिंग एजेंसी",
   "templates.business.real_estate": "रियल एस्टेट",
   "templates.business.fashion": "फैशन रिटेल",
+  "templates.business.product_advertising": "उत्पाद विज्ञापन",
   "templates.fields.brideGroom": "वर और वधू के नाम",
   "templates.fields.date": "तिथि और समय",
   "templates.fields.venue": "स्थान",
@@ -288,7 +292,7 @@ const hi = {
 };
 
 const mr = {
-  "header.title": "सोशल पोस्टर",
+  "header.title": "फोटोफोर्ज",
   "header.sign_out": "साइन आउट करा",
   "auth.title": "सुरू ठेवण्यासाठी साइन इन करा",
   "auth.signInWithGoogle": "Google ने साइन इन करा",
@@ -334,6 +338,7 @@ const mr = {
   "editor.style": "शैली जोडा (पर्यायी)",
   "editor.upload_logo": "लोगो अपलोड करा (पर्यायी)",
   "editor.edit_footer": "फुटर संपादित करा (पर्यायी)",
+  "editor.add_text": "तुमचा मजकूर जोडा",
   "editor.remove_logo": "लोगो काढा",
   "editor.generate_poster": "पोस्टर तयार करा",
   "editor.generate_video": "व्हिडिओ तयार करा",
@@ -378,6 +383,7 @@ const mr = {
   "templates.business.agency": "मार्केटिंग एजन्सी",
   "templates.business.real_estate": "रियल इस्टेट",
   "templates.business.fashion": "फॅशन रिटेल",
+  "templates.business.product_advertising": "उत्पादन जाहिरात",
   "templates.fields.brideGroom": "वर आणि वधूची नावे",
   "templates.fields.date": "तारीख आणि वेळ",
   "templates.fields.venue": "स्थळ",

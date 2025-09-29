@@ -117,7 +117,11 @@ const businessTemplatesData: Omit<Template, 'name'>[] = [
     },
     {
         nameKey: 'templates.business.fashion',
-        prompt: 'Create a stylish and chic poster for a fashion retail business. The design should be trendy, using elegant fonts and a minimalist layout that highlights fashion. The mood should be sophisticated and modern.',
+        prompt: 'Create a stylish and chic poster for a fashion retail business. The design should be trendy, using elegant fonts, and a minimalist layout that highlights fashion. The mood should be sophisticated and modern.',
+    },
+    {
+        nameKey: 'templates.business.product_advertising',
+        prompt: 'Create a compelling and eye-catching poster for product advertising. The design should highlight the product\'s features, use persuasive visuals and text, and have a clear call-to-action. The mood should be dynamic and sales-oriented.',
     }
 ];
 

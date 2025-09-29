@@ -22,7 +22,7 @@ const Header: React.FC<HeaderProps> = ({ onSignOut, showSignOut, tokens, timeUnt
                 <path d="M12.943 2.943a2 2 0 00-1.886 0L2.943 11.057a2 2 0 000 1.886l8.114 8.114a2 2 0 001.886 0l8.114-8.114a2 2 0 000-1.886L12.943 2.943zM12 17.25a5.25 5.25 0 110-10.5 5.25 5.25 0 010 10.5z" />
                 <path d="M12 14.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" />
             </svg>
-            <h1 className="text-2xl font-bold text-white tracking-tight">{t('header.title')} <span className="text-brand-light">AI</span></h1>
+            <h1 className="text-2xl font-bold text-white tracking-tight">{t('header.title')}</h1>
         </div>
         <div className="flex items-center gap-4">
             {showSignOut && (

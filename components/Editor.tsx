@@ -42,6 +42,10 @@ const Editor: React.FC<EditorProps> = ({ originalImage, onGenerate, isLoading, o
   const [footerEmail, setFooterEmail] = useState('');
   const [footerWebsite, setFooterWebsite] = useState('');
 
+  // Product Advertising specific state
+  const [brandTagline, setBrandTagline] = useState('');
+  const [brandOffers, setBrandOffers] = useState('');
+
 
   useEffect(() => {
     setActiveTemplate(null);
@@ -53,6 +57,8 @@ const Editor: React.FC<EditorProps> = ({ originalImage, onGenerate, isLoading, o
     setFooterContact('');
     setFooterEmail('');
     setFooterWebsite('');
+    setBrandTagline('');
+    setBrandOffers('');
   }, [activeTemplate]);
 
   const handleTextFieldChange = (id: string, value: string) => {
@@ -86,7 +92,19 @@ const Editor: React.FC<EditorProps> = ({ originalImage, onGenerate, isLoading, o
         dimensionInstruction = `- Dimensions: The final output image MUST have the exact dimensions of ${originalImage.width} pixels wide by ${originalImage.height} pixels high. Do not alter the aspect ratio or the dimensions.\n`;
     }
 
-    if (activeTemplateTab === 'event') {
+    if (activeTemplate.nameKey === 'templates.business.product_advertising') {
+        finalPrompt = `Create a compelling and eye-catching poster for product advertising.
+${dimensionInstruction}- Main Subject: Use the main subject from the provided image. Perfectly preserve the subject without any changes and seamlessly composite them onto a new, professional background that matches this theme: '${activeTemplate.prompt}'.
+- Text Instructions: IMPORTANT - Do NOT add any random text, headlines, or information. Only use the text elements provided below. If a text element is not provided, do not include it.
+- Final Output: The output should be a complete poster with the subject, new background, and integrated text. Do not output just the background.`;
+
+        if (brandTagline.trim()) {
+            finalPrompt += `\n- Tagline: Artistically integrate the following tagline into the poster. It should be stylish but legible: "${brandTagline.trim()}"`;
+        }
+        if (brandOffers.trim()) {
+            finalPrompt += `\n- Offer: Prominently display the following offer text to attract customers. Make it a key visual element: "${brandOffers.trim()}"`;
+        }
+    } else if (activeTemplateTab === 'event') {
         const textDetails = activeTemplate.fields
             ?.map(field => {
                 const value = textFields[field.id] || '';
@@ -339,6 +357,36 @@ ${dimensionInstruction}- Main Subject: Use the main subject from the provided im
                             </div>
                         )}
                     </div>
+                    {/* Product Advertising Fields */}
+                    {activeTemplate.nameKey === 'templates.business.product_advertising' && (
+                        <div className="space-y-4 pt-4 mt-4 border-t border-base-300/30 animate-fade-in">
+                            <p className="text-sm font-semibold text-gray-300">{stepCounter++}. {t('editor.add_text')}</p>
+                            <div>
+                                <label htmlFor="brandTagline" className="block text-xs font-medium text-gray-400 mb-1">{t('templates.fields.tagline')}</label>
+                                <input
+                                    id="brandTagline"
+                                    type="text"
+                                    value={brandTagline}
+                                    onChange={(e) => setBrandTagline(e.target.value)}
+                                    placeholder={t('templates.placeholders.tagline')}
+                                    className="w-full p-2 bg-base-100 rounded-lg focus:ring-2 focus:ring-brand-primary focus:outline-none transition-shadow text-gray-200 text-sm"
+                                    disabled={isLoading}
+                                />
+                            </div>
+                            <div>
+                                <label htmlFor="brandOffers" className="block text-xs font-medium text-gray-400 mb-1">{t('templates.fields.offer')}</label>
+                                <input
+                                    id="brandOffers"
+                                    type="text"
+                                    value={brandOffers}
+                                    onChange={(e) => setBrandOffers(e.target.value)}
+                                    placeholder={t('templates.placeholders.offer')}
+                                    className="w-full p-2 bg-base-100 rounded-lg focus:ring-2 focus:ring-brand-primary focus:outline-none transition-shadow text-gray-200 text-sm"
+                                    disabled={isLoading}
+                                />
+                            </div>
+                        </div>
+                    )}
                      {/* Footer Details */}
                     <div className="space-y-4">
                         <p className="text-sm font-semibold text-gray-300">{stepCounter++}. {t('editor.edit_footer')}</p>

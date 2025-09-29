@@ -1,6 +1,6 @@
 
 {
-  "header.title": "सोशल पोस्टर",
+  "header.title": "फोटोफोर्ज",
   "header.sign_out": "साइन आउट करें",
   "auth.title": "जारी रखने के लिए साइन इन करें",
   "auth.signInWithGoogle": "Google के साथ साइन इन करें",
@@ -46,6 +46,7 @@
   "editor.style": "शैली जोड़ें (वैकल्पिक)",
   "editor.upload_logo": "लोगो अपलोड करें (वैकल्पिक)",
   "editor.edit_footer": "फुटर संपादित करें (वैकल्पिक)",
+  "editor.add_text": "अपना टेक्स्ट जोड़ें",
   "editor.remove_logo": "लोगो हटाएं",
   "editor.generate_poster": "पोस्टर बनाएं",
   "editor.generate_video": "वीडियो बनाएं",
@@ -90,6 +91,7 @@
   "templates.business.agency": "मार्केटिंग एजेंसी",
   "templates.business.real_estate": "रियल एस्टेट",
   "templates.business.fashion": "फैशन रिटेल",
+  "templates.business.product_advertising": "उत्पाद विज्ञापन",
   "templates.fields.brideGroom": "वर और वधू के नाम",
   "templates.fields.date": "तिथि और समय",
   "templates.fields.venue": "स्थान",
