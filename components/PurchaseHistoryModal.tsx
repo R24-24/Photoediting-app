@@ -29,28 +29,28 @@ const PurchaseHistoryModal: React.FC<PurchaseHistoryModalProps> = ({ isOpen, onC
                         </svg>
                     </button>
                 </div>
-                <div className="p-6 max-h-[60vh] overflow-y-auto">
+                <div className="p-2 sm:p-6 max-h-[60vh] overflow-y-auto">
                     {history.length === 0 ? (
-                        <p className="text-center text-gray-400">You haven't made any purchases yet.</p>
+                        <p className="text-center text-gray-400 p-4">You haven't made any purchases yet.</p>
                     ) : (
                         <table className="w-full text-left">
                             <thead>
                                 <tr className="border-b border-base-300">
-                                    <th className="p-3 text-sm font-semibold text-gray-300">Date</th>
-                                    <th className="p-3 text-sm font-semibold text-gray-300 text-center">Tokens</th>
-                                    <th className="p-3 text-sm font-semibold text-gray-300 text-right">Amount</th>
+                                    <th className="p-2 sm:p-3 text-xs sm:text-sm font-semibold text-gray-300">Date</th>
+                                    <th className="p-2 sm:p-3 text-xs sm:text-sm font-semibold text-gray-300 text-center">Tokens</th>
+                                    <th className="p-2 sm:p-3 text-xs sm:text-sm font-semibold text-gray-300 text-right">Amount</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {history.map((purchase, index) => (
                                     <tr key={index} className="border-b border-base-300/50">
-                                        <td className="p-3 text-gray-300 text-sm">
+                                        <td className="p-2 sm:p-3 text-gray-300 text-xs sm:text-sm">
                                             {new Date(purchase.date).toLocaleString()}
                                         </td>
-                                        <td className="p-3 text-white font-medium text-center">
+                                        <td className="p-2 sm:p-3 text-white font-medium text-center text-xs sm:text-sm">
                                             +{purchase.tokens}
                                         </td>
-                                        <td className="p-3 text-green-400 text-right font-semibold">
+                                        <td className="p-2 sm:p-3 text-green-400 text-right font-semibold text-xs sm:text-sm">
                                             ₹{purchase.amount}
                                         </td>
                                     </tr>

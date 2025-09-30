@@ -2,7 +2,8 @@ import React from 'react';
 import { ToolType } from '../types';
 
 interface ToolProps {
-    icon: JSX.Element;
+    // FIX: Replaced JSX.Element with React.ReactElement to resolve namespace error.
+    icon: React.ReactElement;
     label: string;
     onClick?: () => void;
     disabled?: boolean;

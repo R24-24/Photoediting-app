@@ -156,7 +156,7 @@ ${dimensionInstruction}- Main Subject: Use the main subject from the provided im
   };
 
   const handleStyleClick = (stylePrompt: string) => {
-    setActiveStyle(prev => prev === stylePrompt ? null : stylePrompt);
+    setActiveStyle(prev => prev === stylePrompt ? null : prev === stylePrompt);
   };
 
   const handleTemplateClick = (template: Template) => {
@@ -211,27 +211,28 @@ ${dimensionInstruction}- Main Subject: Use the main subject from the provided im
             <div>
                 <p className="text-sm font-semibold text-gray-300 mb-2">{stepCounter++}. {t('editor.output_format')}</p>
                 <div className="grid grid-cols-2 gap-2 rounded-lg bg-base-300 p-1">
-                    {(['Image', 'Video'] as OutputType[]).map((type) => (
-                        <button
-                            key={type}
-                            type="button"
-                            onClick={() => type === 'Image' && setOutputType(type)}
-                            disabled={isLoading || type === 'Video'}
-                            className={`w-full p-2 rounded-md text-sm font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 ${
-                                outputType === type
-                                    ? 'bg-brand-primary text-white'
-                                    : 'text-gray-400 hover:bg-base-100'
-                            }`}
-                            title={type === 'Video' ? 'Video Generation (Coming Soon)' : 'Generate an Image'}
-                        >
-                            {t(type === 'Image' ? 'editor.image' : 'editor.video')}
-                            {type === 'Video' && (
-                                <span className="text-xs font-bold text-yellow-800 bg-yellow-400 px-2 py-0.5 rounded-full">
-                                    {t('editor.coming_soon')}
-                                </span>
-                            )}
-                        </button>
-                    ))}
+                    <button
+                        key="Image"
+                        type="button"
+                        onClick={() => setOutputType('Image')}
+                        disabled={isLoading}
+                        className={`w-full p-2 rounded-md text-sm font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 ${
+                            outputType === 'Image'
+                                ? 'bg-brand-primary text-white'
+                                : 'text-gray-400 hover:bg-base-100'
+                        }`}
+                    >
+                        {t('editor.image')}
+                    </button>
+                    <button
+                        key="Video"
+                        type="button"
+                        disabled
+                        className="w-full p-2 rounded-md text-sm font-semibold text-gray-500 bg-base-100/50 cursor-not-allowed relative"
+                    >
+                        <span>{t('editor.video')}</span>
+                        <span className="absolute top-1 right-2 text-yellow-500/80 text-[10px] font-bold tracking-wider">{t('editor.coming_soon')}</span>
+                    </button>
                 </div>
             </div>
 

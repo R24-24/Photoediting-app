@@ -1,9 +1,10 @@
-import { GoogleGenAI, Modality } from "@google/genai";
+import { GoogleGenAI, Modality, GenerateContentResponse } from "@google/genai";
 import { GeneratedContent, PosterLogo, ImageData } from '../types';
 
-const API_KEY = "AIzaSyDeeF_m5XKE2uphF8tT4KZojmk6YFP9zQU";
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
-const ai = new GoogleGenAI({ apiKey: API_KEY });
+// FIX: Define a type alias for the video operation response to ensure type safety.
+type VideosOperation = Awaited<ReturnType<typeof ai.models.generateVideos>>;
 
 /**
  * A utility function to retry an async operation with exponential backoff.
@@ -59,7 +60,8 @@ export async function editImageWithPrompt(
       const textPart = { text: prompt };
       const maskPart = { inlineData: { data: maskBase64, mimeType: 'image/png' } };
       
-      const response = await retryWithBackoff(() => ai.models.generateContent({
+      // FIX: Add generic type to retryWithBackoff to ensure response is correctly typed.
+      const response = await retryWithBackoff<GenerateContentResponse>(() => ai.models.generateContent({
         model: 'gemini-2.5-flash-image-preview',
         contents: { parts: [imagePart, maskPart, textPart] },
         config: { responseModalities: [Modality.IMAGE, Modality.TEXT] },
@@ -87,7 +89,8 @@ export async function editImageWithPrompt(
           parts.push(logoPart);
       }
 
-      const response = await retryWithBackoff(() => ai.models.generateContent({
+      // FIX: Add generic type to retryWithBackoff to ensure response is correctly typed.
+      const response = await retryWithBackoff<GenerateContentResponse>(() => ai.models.generateContent({
         model: 'gemini-2.5-flash-image-preview',
         contents: { parts },
         config: { responseModalities: [Modality.IMAGE, Modality.TEXT] },
@@ -134,7 +137,8 @@ export async function generateVideoFromImage(
 
     animationPrompt += ` ${prompt}`;
 
-    let operation = await retryWithBackoff(() => ai.models.generateVideos({
+    // FIX: Add generic type to retryWithBackoff to ensure 'operation' is correctly typed.
+    let operation = await retryWithBackoff<VideosOperation>(() => ai.models.generateVideos({
       model: 'veo-2.0-generate-001',
       prompt: animationPrompt,
       image: {
@@ -149,7 +153,8 @@ export async function generateVideoFromImage(
     // Poll for completion
     while (!operation.done) {
       await new Promise(resolve => setTimeout(resolve, 10000));
-      operation = await retryWithBackoff(() => ai.operations.getVideosOperation({ operation: operation }));
+      // FIX: Add generic type to retryWithBackoff to ensure 'operation' is correctly typed.
+      operation = await retryWithBackoff<VideosOperation>(() => ai.operations.getVideosOperation({ operation: operation }));
     }
 
     const downloadLink = operation.response?.generatedVideos?.[0]?.video?.uri;
@@ -157,7 +162,7 @@ export async function generateVideoFromImage(
       throw new Error("Video generation failed to produce a valid output.");
     }
 
-    const videoResponse = await fetch(`${downloadLink}&key=${API_KEY}`);
+    const videoResponse = await fetch(`${downloadLink}&key=${process.env.API_KEY}`);
     if (!videoResponse.ok) {
       throw new Error(`Failed to download the generated video. Status: ${videoResponse.status}`);
     }
@@ -191,7 +196,8 @@ export async function removeImageBackground(
     const imagePart = { inlineData: { data: base64ImageData, mimeType } };
     const textPart = { text: prompt };
 
-    const response = await retryWithBackoff(() => ai.models.generateContent({
+    // FIX: Add generic type to retryWithBackoff to ensure response is correctly typed.
+    const response = await retryWithBackoff<GenerateContentResponse>(() => ai.models.generateContent({
       model: 'gemini-2.5-flash-image-preview',
       contents: { parts: [imagePart, textPart] },
       config: { responseModalities: [Modality.IMAGE] },
